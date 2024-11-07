@@ -99,7 +99,6 @@ export async function checkFrontend() {
 
 
     // Click on the place order button
-   
     const placeOrderButton = page.locator('//*[@id="place_order"]');
     await Promise.all([page.waitForNavigation(), placeOrderButton.click()]);
     //page.screenshot({ path: 'screenshots/8_Order_Placed.png'});
