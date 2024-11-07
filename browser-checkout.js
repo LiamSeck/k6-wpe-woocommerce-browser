@@ -3,21 +3,42 @@ import { check } from 'k6';
 import { sleep } from 'k6';
 
 export const options = {
+// K6 Cloud Config
+cloud: {
+  // Project: WPE WooCommerce Load Testing
+  projectID: 3717362,
+  // Test runs with the same name groups test runs together.
+  name: 'Browser Load Testing of https://liamseprod.wpenginepowered.com/',
+  // Adding Load Zone so that traffic routes from amazon:gb:london over the default location
+  distribution: {
+    AWSLondon: { loadZone: 'amazon:gb:london', percent: 100 },
+  },
+},
   scenarios: {
     BrowserCheckOutScenario: {
+        exec: 'checkFrontend',
         executor: 'constant-vus',
         vus: 1,
         duration: "1m",   
-            options: {
-        browser: {
-          type: 'chromium', 
+        options: {
+          browser: {
+            type: 'chromium', 
         },
       },
     },
+  },
+
+  thresholds: {
+  // Browser Level Thresholds based on Core Web Vitals: https://web.dev/articles/defining-core-web-vitals-thresholds 
+    browser_web_vital_lcp: ['p(75) < 2500'],
+    browser_web_vital_inp: ['p(75) < 200'],
+    browser_web_vital_cls: ['p(75) < 0.1'],
+    browser_web_vital_fcp: ['p(95) < 1800'],
+    browser_web_vital_ttfb: ['p(95) < 800'],
   }
 }
 
-export default async function () {
+export async function checkFrontend() {
     // Initiate a new browser
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -57,15 +78,15 @@ export default async function () {
     //page.screenshot({ path: 'screenshots/6_Checkout.png' });
 
     // Enter Shipping Information
-    page.locator('input[name="billing_first_name"]').type('FirstName');
+    page.locator('input[name="billing_first_name"]').type('Headless');
     sleep(.1);
-    page.locator('input[name="billing_last_name"]').type('LastName');
+    page.locator('input[name="billing_last_name"]').type('Chrome Browser');
     // sleep(.1);
-    // page.locator('input[name="billing_country"]').type('United Kingdom (UK)');
+    //page.locator('input[name="billing_country"]').type('United Kingdom (UK)');
     sleep(.1);
-    page.locator('input[name="billing_address_1"]').type('TEST-HOUSE, TEST-PLACE');
+    page.locator('input[name="billing_address_1"]').type('HEADLESS-TEST-HOUSE, HEADLESS-TEST-PLACE');
     sleep(.1);
-    page.locator('input[name="billing_city"]').type('TEST-CITY');
+    page.locator('input[name="billing_city"]').type('HEADLESS-TEST-CITY');
     sleep(.1);
     page.locator('input[name="billing_state"]').type('');
     sleep(.1);
@@ -75,6 +96,7 @@ export default async function () {
     sleep(.1);
     page.locator('input[name="billing_email"]').type('test@test.com');
     //page.screenshot({ path: 'screenshots/7_Shipping_Info.png' });
+
 
     // Click on the place order button
    
